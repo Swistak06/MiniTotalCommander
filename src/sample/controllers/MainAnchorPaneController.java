@@ -8,7 +8,8 @@ public class MainAnchorPaneController extends AnchorPane{
     @FXML
     private ChildAnchorPaneController leftAnchorPaneController;
 
-    @FXML ChildAnchorPaneController rightAnchorPaneController;
+    @FXML
+    private ChildAnchorPaneController rightAnchorPaneController;
 
 
 
