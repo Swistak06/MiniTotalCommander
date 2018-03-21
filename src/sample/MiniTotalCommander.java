@@ -13,6 +13,7 @@ public class MiniTotalCommander extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("view/mainAnchorPane.fxml"));
         primaryStage.setTitle("Mini Total Commander");
         primaryStage.setScene(new Scene(root, 800, 600));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

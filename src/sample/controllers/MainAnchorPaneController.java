@@ -11,10 +11,17 @@ public class MainAnchorPaneController extends AnchorPane{
     @FXML
     private ChildAnchorPaneController rightAnchorPaneController;
 
-
+    public ChildAnchorPaneController returnOtherController(ChildAnchorPaneController child){
+        if(child.hashCode() == rightAnchorPaneController.hashCode())
+            return leftAnchorPaneController;
+        else
+            return rightAnchorPaneController;
+    }
 
     @FXML
     private void initialize(){
+        leftAnchorPaneController.incjectMain(this);
+        rightAnchorPaneController.incjectMain(this);
 
     }
 }
