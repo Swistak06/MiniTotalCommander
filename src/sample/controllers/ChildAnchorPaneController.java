@@ -1,12 +1,10 @@
 package sample.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -19,8 +17,8 @@ public class ChildAnchorPaneController {
 
     private String currPath;
 
-    @FXML
-    private AnchorPane RigthAnchor;
+    //@FXML
+    //private AnchorPane RigthAnchor;
 
     @FXML
     private ListView<String> ExplorerList;
@@ -31,12 +29,12 @@ public class ChildAnchorPaneController {
     @FXML
     private ComboBox<String> DriveComboBox;
 
-    @FXML
-    private Button goingUpButton;
+    //@FXML
+    //private Button goingUpButton;
 
     public void initializingValuesOfDriverComboBox(){
         File[] drivers;
-        FileSystemView fsv = FileSystemView.getFileSystemView();
+        //FileSystemView fsv = FileSystemView.getFileSystemView();
         drivers = File.listRoots();
         for(File driver:drivers)
             if(driver.isHidden())
@@ -72,7 +70,7 @@ public class ChildAnchorPaneController {
 
 
     public boolean isElementOfListDoubleClicked(){
-        long diff = 0;
+        long diff;
         boolean isdblClicked = false;
         currentTime=System.currentTimeMillis();
         if(lastTime!=0 && currentTime!=0){
@@ -140,6 +138,10 @@ public class ChildAnchorPaneController {
             }
     }
 
+    @FXML
+    public void reloadDiskList(){
+
+    }
     @FXML
     public void initialize(){
         initializingValuesOfDriverComboBox();
