@@ -1,5 +1,6 @@
 package sample.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -8,30 +9,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import sample.services.ChildControllerService;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class ChildAnchorPaneController {
 
 
-    private long currentTime,lastTime=0;
-
-    public String getCurrPath() {
-        return currPath;
-    }
-
-    private String currPath;
-
     private final ChildControllerService service = new ChildControllerService();
 
     private MainAnchorPaneController main;
 
-    //@FXML
-    //private AnchorPane RigthAnchor;
+    private ChildAnchorPaneController otherChild;
 
     @FXML
     private ListView<String> ExplorerList;
@@ -51,30 +41,18 @@ public class ChildAnchorPaneController {
     //@FXML
     //private Button goingUpButton;
 
+    public ChildControllerService getService() {
+        return service;
+    }
+
+
     public void incjectMain(MainAnchorPaneController main){
         this.main = main;
     }
 
     public void initializnigPathTextField(){
-        this.currPath = this.DriveComboBox.getSelectionModel().getSelectedItem();
-        this.PathTextField.setText(this.currPath);
-    }
-
-//    public void initializingExplorer(String parentPath){
-//
-//    }
-
-
-    public boolean isElementOfListDoubleClicked(){
-        long diff;
-        boolean isdblClicked = false;
-        currentTime=System.currentTimeMillis();
-        if(lastTime!=0 && currentTime!=0){
-            diff=currentTime-lastTime;
-            isdblClicked = diff <= 215;
-        }
-        lastTime=currentTime;
-        return isdblClicked;
+        this.service.setCurrPath(this.DriveComboBox.getSelectionModel().getSelectedItem());
+        this.PathTextField.setText(this.service.getCurrPath());
     }
 
     public void isSingleClicked(){
@@ -82,29 +60,30 @@ public class ChildAnchorPaneController {
     }
 
     public void isDoubleClicked(){
-        String newPath = currPath + this.ExplorerList.getSelectionModel().getSelectedItem()+"\\";
+        String newPath = service.getCurrPath() + this.ExplorerList.getSelectionModel().getSelectedItem()+"\\";
         if(!new File(newPath).isFile() && !this.ExplorerList.getSelectionModel().isEmpty() && new File(newPath).exists()){
-            currPath = newPath;
+            service.setCurrPath(newPath);
             this.PathTextField.setText(newPath);
             this.ExplorerList.getItems().remove(0,this.ExplorerList.getItems().size());
-            service.initializingExplorerList(this.ExplorerList,currPath);
+            service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
         }
     }
 
     @FXML
-    void choosingDriveFromComboBox() {
-        if(!DriveComboBox.getSelectionModel().isEmpty()){
-            this.currPath = this.DriveComboBox.getSelectionModel().getSelectedItem();
-            this.PathTextField.setText(currPath);
-            this.ExplorerList.getItems().remove(0,this.ExplorerList.getItems().size());
-            service.initializingExplorerList(this.ExplorerList,currPath);
+    public void choosingDriveFromComboBox(ActionEvent event) {
+        ComboBox comboBox = (ComboBox)event.getSource();
+        if(!comboBox.getSelectionModel().isEmpty()){
+            this.service.setCurrPath(comboBox.getSelectionModel().getSelectedItem().toString());
+            this.PathTextField.setText(service.getCurrPath());
+            ExplorerList.getItems().remove(0,ExplorerList.getItems().size());
+            service.initializingExplorerList(ExplorerList,service.getCurrPath());
         }
 
     }
 
     @FXML
     public void choosingDirectoryFromList() {
-        if(!isElementOfListDoubleClicked())
+        if(!service.isElementOfListDoubleClicked())
             isSingleClicked();
         else
             isDoubleClicked();
@@ -113,15 +92,15 @@ public class ChildAnchorPaneController {
 
     @FXML
     void goingUp() {
-        File file = new File(this.currPath);
+        File file = new File(service.getCurrPath());
         if(file.getParent() != null){
             if(new File(file.getParent()).getParent() == null)
-                this.currPath = file.getParent();
+                service.setCurrPath(file.getParent());
             else
-                this.currPath = file.getParent()+"\\";
-            this.PathTextField.setText(currPath);
+                service.setCurrPath(file.getParent()+"\\");
+            this.PathTextField.setText(service.getCurrPath());
             this.ExplorerList.getItems().remove(0,this.ExplorerList.getItems().size());
-            service.initializingExplorerList(this.ExplorerList,currPath);
+            service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
         }
     }
 
@@ -131,9 +110,9 @@ public class ChildAnchorPaneController {
         File file = new File(this.PathTextField.getText());
         if(znak == 13)
             if(!this.PathTextField.getText().isEmpty() && file.exists() && file.isDirectory()){
-                currPath = PathTextField.getText();
+                service.setCurrPath(PathTextField.getText());
                 this.ExplorerList.getItems().remove(0,this.ExplorerList.getItems().size());
-                service.initializingExplorerList(this.ExplorerList,currPath);
+                service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
             }
     }
 
@@ -145,20 +124,20 @@ public class ChildAnchorPaneController {
             service.initializeDrivers(this.DriveComboBox);
 
         }
-
-
-
     }
 
     @FXML
-    void copySelectedFile() {
+    void copySelectedFile() throws IOException {
+        if(otherChild == null)
+            otherChild = main.getOtherController(this);
         String pathToCopy="empty";
+        String destinationPath = otherChild.PathTextField.getText();
         if(!this.ExplorerList.getSelectionModel().isEmpty())
-            pathToCopy = currPath+this.ExplorerList.getSelectionModel().getSelectedItem();
+            pathToCopy = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
         File src = new File(pathToCopy);
-        File dst = new File(main.returnOtherController(this).getCurrPath());
-        
-
+        File dst = new File(destinationPath+src.getName());
+        if(src.isFile())
+        Files.copy(src.toPath(),dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
     }
 
@@ -166,11 +145,16 @@ public class ChildAnchorPaneController {
     void deleteSelectedFile() {
         String pathToDelete = "wrong";
         if(!this.ExplorerList.getSelectionModel().isEmpty())
-            pathToDelete = currPath+this.ExplorerList.getSelectionModel().getSelectedItem();
+            pathToDelete = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
         File file = new File(pathToDelete);
         file.delete();
+        if(this.main.getOtherController(this).service.getCurrPath() == this.service.getCurrPath()){
+            System.out.println("Kappa");
+            main.getOtherController(this).ExplorerList.getItems().clear();
+            main.getOtherController(this).service.initializingExplorerList(main.getOtherController(this).ExplorerList,main.getOtherController(this).service.getCurrPath());
+        }
         this.ExplorerList.getItems().clear();
-        service.initializingExplorerList(this.ExplorerList,currPath);
+        service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
     }
 
     @FXML
@@ -178,8 +162,7 @@ public class ChildAnchorPaneController {
         service.initializeDrivers(this.DriveComboBox);
         this.DriveComboBox.getSelectionModel().select(0);
         initializnigPathTextField();
-        service.initializingExplorerList(this.ExplorerList,currPath);
-
+        service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
     }
 
 
