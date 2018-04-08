@@ -17,5 +17,7 @@
             <Font size="14.0" />
          </font>
       </Button>
+      <Button fx:id="deleteSelectedFileButton" layoutX="102.0" layoutY="86.0" mnemonicParsing="false" onAction="#deleteSelectedFile" text="delete" />
+      <Button fx:id="copySelectedFileButton" layoutX="207.0" layoutY="86.0" mnemonicParsing="false" onAction="#copySelectedFile" text="copy" />
    </children>
 </AnchorPane>

@@ -7,12 +7,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import org.apache.commons.io.FileUtils;
 import sample.services.ChildControllerService;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
 
 public class ChildAnchorPaneController {
 
@@ -38,13 +40,12 @@ public class ChildAnchorPaneController {
     @FXML
     private Button copySelectedFileButton;
 
-    //@FXML
-    //private Button goingUpButton;
+    @FXML
+    private Button goingUpButton;
 
     public ChildControllerService getService() {
         return service;
     }
-
 
     public void incjectMain(MainAnchorPaneController main){
         this.main = main;
@@ -53,11 +54,10 @@ public class ChildAnchorPaneController {
     public void initializnigPathTextField(){
         this.service.setCurrPath(this.DriveComboBox.getSelectionModel().getSelectedItem());
         this.PathTextField.setText(this.service.getCurrPath());
-    }
-
-    public void isSingleClicked(){
 
     }
+
+
 
     public void isDoubleClicked(){
         String newPath = service.getCurrPath() + this.ExplorerList.getSelectionModel().getSelectedItem()+"\\";
@@ -66,6 +66,8 @@ public class ChildAnchorPaneController {
             this.PathTextField.setText(newPath);
             this.ExplorerList.getItems().remove(0,this.ExplorerList.getItems().size());
             service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
+
+
         }
     }
 
@@ -83,9 +85,7 @@ public class ChildAnchorPaneController {
 
     @FXML
     public void choosingDirectoryFromList() {
-        if(!service.isElementOfListDoubleClicked())
-            isSingleClicked();
-        else
+        if(service.isElementOfListDoubleClicked())
             isDoubleClicked();
     }
 
@@ -136,22 +136,26 @@ public class ChildAnchorPaneController {
             pathToCopy = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
         File src = new File(pathToCopy);
         File dst = new File(destinationPath+src.getName());
-        if(src.isFile())
-        Files.copy(src.toPath(),dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
+        if(src.isFile()){
+            System.out.println("kopiujemy!");
+            Files.copy(src.toPath(),dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            otherChild.ExplorerList.getItems().clear();
+            otherChild.service.initializingExplorerList(otherChild.ExplorerList,otherChild.service.getCurrPath());
+        }
     }
 
     @FXML
     void deleteSelectedFile() {
+        if(otherChild == null)
+            otherChild = main.getOtherController(this);
         String pathToDelete = "wrong";
         if(!this.ExplorerList.getSelectionModel().isEmpty())
             pathToDelete = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
         File file = new File(pathToDelete);
         file.delete();
-        if(this.main.getOtherController(this).service.getCurrPath() == this.service.getCurrPath()){
-            System.out.println("Kappa");
-            main.getOtherController(this).ExplorerList.getItems().clear();
-            main.getOtherController(this).service.initializingExplorerList(main.getOtherController(this).ExplorerList,main.getOtherController(this).service.getCurrPath());
+        if(otherChild.service.getCurrPath().equals(this.service.getCurrPath())){
+            otherChild.ExplorerList.getItems().clear();
+            otherChild.service.initializingExplorerList(otherChild.ExplorerList,otherChild.service.getCurrPath());
         }
         this.ExplorerList.getItems().clear();
         service.initializingExplorerList(this.ExplorerList,service.getCurrPath());
