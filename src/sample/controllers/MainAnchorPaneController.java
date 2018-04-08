@@ -11,7 +11,7 @@ public class MainAnchorPaneController extends AnchorPane{
     @FXML
     private ChildAnchorPaneController rightAnchorPaneController;
 
-    public ChildAnchorPaneController getOtherController(ChildAnchorPaneController child){
+    public ChildAnchorPaneController getOtherChildController(ChildAnchorPaneController child){
         if(child.hashCode() == rightAnchorPaneController.hashCode())
             return leftAnchorPaneController;
         else

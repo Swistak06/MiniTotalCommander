@@ -12,8 +12,6 @@ import sample.services.ChildControllerService;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 
 public class ChildAnchorPaneController {
@@ -128,17 +126,28 @@ public class ChildAnchorPaneController {
 
     @FXML
     void copySelectedFile() throws IOException {
+        //Przypisanie do składowej otherChild referencji do bliźniaczej kontrolki
         if(otherChild == null)
-            otherChild = main.getOtherController(this);
+            otherChild = main.getOtherChildController(this);
+
+        //Utworzenie zmiennych przechowujących ścieżki
         String pathToCopy="empty";
         String destinationPath = otherChild.PathTextField.getText();
+
+        //Jeżeli został wybrany z listy jakiś element
         if(!this.ExplorerList.getSelectionModel().isEmpty())
             pathToCopy = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
+
         File src = new File(pathToCopy);
         File dst = new File(destinationPath+src.getName());
-        if(src.isFile()){
-            System.out.println("kopiujemy!");
-            Files.copy(src.toPath(),dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        if(src.isFile() || src.isDirectory()){
+            try {
+                FileUtils.copyDirectory(src, dst);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //Odświeżenie listy w bliźniaczej kontrolce
             otherChild.ExplorerList.getItems().clear();
             otherChild.service.initializingExplorerList(otherChild.ExplorerList,otherChild.service.getCurrPath());
         }
@@ -146,13 +155,20 @@ public class ChildAnchorPaneController {
 
     @FXML
     void deleteSelectedFile() {
+        //Przypisanie do składowej otherChild referencji do bliźniaczej kontrolki
         if(otherChild == null)
-            otherChild = main.getOtherController(this);
+            otherChild = main.getOtherChildController(this);
         String pathToDelete = "wrong";
+        //Jeżeli został wybrany z listy jakiś element
         if(!this.ExplorerList.getSelectionModel().isEmpty())
             pathToDelete = service.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
         File file = new File(pathToDelete);
-        file.delete();
+        try {
+            FileUtils.deleteDirectory(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Jeżeli obie kontrolki wskazują na tą samą ścieżkę to lista bliźniaczej kontrolki jest odświeżana
         if(otherChild.service.getCurrPath().equals(this.service.getCurrPath())){
             otherChild.ExplorerList.getItems().clear();
             otherChild.service.initializingExplorerList(otherChild.ExplorerList,otherChild.service.getCurrPath());
