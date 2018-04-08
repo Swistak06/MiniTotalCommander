@@ -46,7 +46,6 @@ public class ChildControllerService {
 
     public void initializeDrivers(ComboBox<String> comboBox ){
         File[] drivers;
-        //FileSystemView fsv = FileSystemView.getFileSystemView();
         drivers = File.listRoots();
         for(File driver:drivers)
             if(driver.isHidden())
