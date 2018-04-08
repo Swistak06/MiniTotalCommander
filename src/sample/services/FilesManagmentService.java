@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class FilesManagmentService {
-    public void copyFileToDirection(String source,String destination){
+    public void copySelectedFileToDirection(String source, String destination){
         File src = new File(source);
         File dest = new File(destination+src.getName());
         try {
@@ -20,6 +20,16 @@ public class FilesManagmentService {
         File file = new File(pathToDelete);
         try {
             FileUtils.deleteDirectory(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void moveSelectedFileToDirection(String source, String destination){
+        File src = new File(source);
+        File dest = new File(destination+src.getName());
+        try {
+            FileUtils.moveDirectory(src,dest);
         } catch (IOException e) {
             e.printStackTrace();
         }

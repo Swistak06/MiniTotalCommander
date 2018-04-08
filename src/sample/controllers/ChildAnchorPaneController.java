@@ -7,12 +7,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import org.apache.commons.io.FileUtils;
 import sample.services.ChildControllerService;
 import sample.services.FilesManagmentService;
 
 import java.io.File;
-import java.io.IOException;
 
 
 public class ChildAnchorPaneController {
@@ -43,7 +41,10 @@ public class ChildAnchorPaneController {
     @FXML
     private Button goingUpButton;
 
-    public ChildControllerService getChildControllerService() {
+    @FXML
+    private Button moveSelectedFileButton;
+
+    private ChildControllerService getChildControllerService() {
         return childControllerService;
     }
 
@@ -51,14 +52,14 @@ public class ChildAnchorPaneController {
         this.main = main;
     }
 
-    public void initializnigPathTextField(){
+    private void initializnigPathTextField(){
         this.childControllerService.setCurrPath(this.DriveComboBox.getSelectionModel().getSelectedItem());
         this.PathTextField.setText(this.childControllerService.getCurrPath());
     }
 
 
 
-    public void isDoubleClicked(){
+    private void isDoubleClicked(){
         String newPath = childControllerService.getCurrPath() + this.ExplorerList.getSelectionModel().getSelectedItem()+"\\";
         if(!new File(newPath).isFile() && !this.ExplorerList.getSelectionModel().isEmpty() && new File(newPath).exists()){
             childControllerService.setCurrPath(newPath);
@@ -134,7 +135,7 @@ public class ChildAnchorPaneController {
         //Jeżeli został wybrany z listy jakiś element
         if(!this.ExplorerList.getSelectionModel().isEmpty()){
             pathToCopy = childControllerService.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
-            filesManagmentService.copyFileToDirection(pathToCopy,destinationPath);
+            filesManagmentService.copySelectedFileToDirection(pathToCopy,destinationPath);
             //Odświeżenie listy w bliźniaczej kontrolce
             otherChild.ExplorerList.getItems().clear();
             otherChild.childControllerService.initializingExplorerList(otherChild.ExplorerList,otherChild.childControllerService.getCurrPath());
@@ -142,7 +143,7 @@ public class ChildAnchorPaneController {
     }
 
     @FXML
-    void deleteSelectedFile() {
+    public void deleteSelectedFile() {
         //Przypisanie do składowej otherChild referencji do bliźniaczej kontrolki
         if(otherChild == null)
             otherChild = main.getOtherChildController(this);
@@ -159,6 +160,27 @@ public class ChildAnchorPaneController {
             this.ExplorerList.getItems().clear();
             childControllerService.initializingExplorerList(this.ExplorerList, childControllerService.getCurrPath());
         }
+    }
+
+    @FXML
+    public void moveSelectedFile(){
+        //Przypisanie do składowej otherChild referencji do bliźniaczej kontrolki
+        if(otherChild == null)
+            otherChild = main.getOtherChildController(this);
+        String pathToMove;
+        String destinationPath = otherChild.getChildControllerService().getCurrPath();
+
+        //Jeżeli został wybrany z listy jakiś element
+        if(!this.ExplorerList.getSelectionModel().isEmpty()){
+            pathToMove = childControllerService.getCurrPath()+this.ExplorerList.getSelectionModel().getSelectedItem();
+            filesManagmentService.moveSelectedFileToDirection(pathToMove,destinationPath);
+            //Odświeżenie list w obu kontrolkach
+            this.ExplorerList.getItems().clear();
+            this.childControllerService.initializingExplorerList(this.ExplorerList,this.childControllerService.getCurrPath());
+            otherChild.ExplorerList.getItems().clear();
+            otherChild.childControllerService.initializingExplorerList(otherChild.ExplorerList,otherChild.childControllerService.getCurrPath());
+        }
+
     }
 
     @FXML
