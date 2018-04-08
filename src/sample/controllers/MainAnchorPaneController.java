@@ -22,7 +22,5 @@ public class MainAnchorPaneController extends AnchorPane{
     private void initialize(){
         leftAnchorPaneController.incjectMain(this);
         rightAnchorPaneController.incjectMain(this);
-
-
     }
 }
